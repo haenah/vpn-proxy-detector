@@ -1,0 +1,24 @@
+{
+  "name": "vpn-proxy-detector",
+  "version": "1.0.0",
+  "description": "vpn-proxy-detector",
+  "main": "index.js",
+  "repository": "git@github.com:haenah/vpn-proxy-detector.git",
+  "author": "sckimynwa <tsb03672@naver.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "ts-node src/logger.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "geoip-lite": "^1.4.7"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.20",
+    "@types/geoip-lite": "^1.4.3",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
