@@ -10,6 +10,7 @@ import { Player } from "../../layout/player/Player";
 import { Content } from "@css/helper/content";
 import { Meta } from "@lib/meta";
 import { detectBlackList } from "@lib/api/vpndb";
+import Image from "next/image";
 
 const PlayerWrapper = styled.div``;
 
@@ -26,6 +27,22 @@ const PlayerIncompatible = styled.div`
   justify-content: center;
   align-items: center;
   text-align: center;
+`;
+
+const PlayerUsingVpn = styled.div`
+  ${fillParent};
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  background-color: ${(p) => p.theme.gray100};
+`;
+
+const VPNContent = styled(Content)`
+  margin-top: 60px;
+  font-size: 20px;
 `;
 
 interface WatchProps {
@@ -50,11 +67,13 @@ const Watch: React.FC<WatchProps> = ({ show, browserCompatible, usingVPN }) => {
 
   if (usingVPN) {
     return (
-      <PlayerIncompatible>
-        <Content>
-          It seems like you&apos;re using a VPN. Please disable it to watch.
-        </Content>
-      </PlayerIncompatible>
+      <PlayerUsingVpn>
+        <Image alt="oops" src="/img/oops.png" width={200} height={200} />
+        <VPNContent>
+          Oops! It seems like you&apos;re using a VPN. Please disable it to
+          watch.
+        </VPNContent>
+      </PlayerUsingVpn>
     );
   }
 
