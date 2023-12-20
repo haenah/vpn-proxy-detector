@@ -9,6 +9,7 @@ import { fillParent } from "@css/helper";
 import { Player } from "../../layout/player/Player";
 import { Content } from "@css/helper/content";
 import { Meta } from "@lib/meta";
+import { detectBlackList } from "@lib/api/vpndb";
 
 const PlayerWrapper = styled.div``;
 
@@ -30,9 +31,10 @@ const PlayerIncompatible = styled.div`
 interface WatchProps {
   show: Api.TVDetails;
   browserCompatible: boolean;
+  usingVPN: boolean;
 }
 
-const Watch: React.FC<WatchProps> = ({ show, browserCompatible }) => {
+const Watch: React.FC<WatchProps> = ({ show, browserCompatible, usingVPN }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { waiting } = useAppSelector((state) => state.player);
 
@@ -45,6 +47,16 @@ const Watch: React.FC<WatchProps> = ({ show, browserCompatible }) => {
         </Content>
       </PlayerIncompatible>
     );
+
+  if (usingVPN) {
+    return (
+      <PlayerIncompatible>
+        <Content>
+          It seems like you&apos;re using a VPN. Please disable it to watch.
+        </Content>
+      </PlayerIncompatible>
+    );
+  }
 
   return (
     <PlayerWrapper ref={containerRef}>
@@ -61,6 +73,12 @@ const Watch: React.FC<WatchProps> = ({ show, browserCompatible }) => {
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const id = ctx.params?.identifier;
+
+  // get ip address
+  const ip = ctx.req?.socket?.remoteAddress;
+  const ipv4 = ip?.split(":").pop() ?? "";
+
+  const isVpn = await detectBlackList(ipv4);
 
   if (!id || typeof id !== "string") {
     return {
@@ -83,6 +101,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       show,
       browserCompatible: compatible,
       hideNavigation: compatible,
+      usingVPN: isVpn,
     },
   };
 };
