@@ -38,3 +38,7 @@ NEXT_PUBLIC_THE_MOVIE_DB_V3_BASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_SUPABASE_URL=
 ```
+
+## Blacklist Database
+
+This project uses Supabase as a database. The database is closed to the public. If you want to access the database, please contact the developer.
