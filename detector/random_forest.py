@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import f1_score
-from to_csv_nfs_v2 import load_dataframe
+from to_csv_nfs import load_dataframe
 from nfs_attributes import train_attributes
 import data
 
