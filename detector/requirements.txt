@@ -6,3 +6,4 @@ six
 tzdata
 seaborn
 scikit-learn
+nfstream

@@ -2,14 +2,14 @@ services = {
     "aim": [
         "vpn_aim_chat1a.pcap",
         "vpn_aim_chat1b.pcap",
-    ],
-    "email": [
-        "vpn_email2a.pcap",
-        "vpn_email2b.pcap",
         "AIMchat1.pcapng",
         "AIMchat2.pcapng",
         "aim_chat_3a.pcap",
         "aim_chat_3b.pcap",
+    ],
+    "email": [
+        "vpn_email2a.pcap",
+        "vpn_email2b.pcap",
         "email1a.pcap",
         "email1b.pcap",
         "email2a.pcap",

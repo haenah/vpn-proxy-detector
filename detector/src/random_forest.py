@@ -59,19 +59,6 @@ if __name__ == "__main__":
         df = load_dataframe_from_services(version=1)
         f1 = fit_test(df, version=1)
         print(f"f1 score for all is {f1}")
-
-        # version 2
-        print("===============VNAT===============")
-        for service in data.services_v2:
-            df = load_dataframe_from_services(service, version=2)
-            if len(df[df["label"] == 1]) == 0:
-                print(f"no vpn packet for {service}")
-                continue
-            f1 = fit_test(df, version=2)
-            print(f"f1 score for {service} is {f1}")
-        df = load_dataframe_from_services(version=2)
-        f1 = fit_test(df, version=2)
-        print(f"f1 score for all is {f1}")
     else:
         # Save the model
         df = load_dataframe_from_services(version=1)

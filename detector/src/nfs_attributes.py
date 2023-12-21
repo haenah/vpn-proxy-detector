@@ -36,5 +36,4 @@ train_attributes = [
     "bidirectional_mean_ps",
     "bidirectional_stddev_ps",
     "dst2src_mean_ps",
-    # "dst_ip_freq",
 ]

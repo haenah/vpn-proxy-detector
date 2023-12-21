@@ -15,6 +15,20 @@ class Record(metaclass=ABCMeta):
         """Returns an IPv4 address in the record."""
 
 
+class PacketRecord(Record):
+    def __init__(self, packet):
+        self.packet = packet
+
+    def __str__(self) -> str:
+        return self.packet["dst_ip"]
+
+    def __format__(self, __format_spec: str) -> str:
+        return format(self.packet["dst_ip"], __format_spec)
+
+    def ipv4(self) -> str | int:
+        return self.packet["dst_ip"]
+
+
 class DefaultRecord(Record):
     def __init__(self, ip: str) -> None:
         self.ip = ip
@@ -57,6 +71,13 @@ class Clusterer:
             self.__remainders.append(record)
         else:
             self.__clusters[idx].append(record)
+
+    def get_clusters(self):
+        clusters = self.__clusters.copy()
+        clusters.append(self.__remainders)
+        # filter empty clusters
+        clusters = list(filter(lambda cluster: len(cluster) > 0, clusters))
+        return clusters
 
     def __bsearch(self, target: int) -> int | None:
         start = int(0)
