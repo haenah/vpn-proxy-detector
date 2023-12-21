@@ -11,16 +11,17 @@ def ipv4_to_int(ip) -> int:
 
 class Record(metaclass=ABCMeta):
     @abstractmethod
-    def ipv4(self) -> str | int: """Returns an IPv4 address in the record."""
+    def ipv4(self) -> str | int:
+        """Returns an IPv4 address in the record."""
 
 
 class DefaultRecord(Record):
     def __init__(self, ip: str) -> None:
         self.ip = ip
-    
+
     def __str__(self) -> str:
         return str(self.ip)
-    
+
     def __format__(self, __format_spec: str) -> str:
         return format(self.ip, __format_spec)
 
@@ -34,7 +35,9 @@ class Clusterer:
         self.__clusters: List[List[Record]] = []
         self.__remainders: List[Record] = []
 
-        isp_ipv4_assignment = pd.read_csv(file_name, names=["ISP", "ISP_Eng", "Start_IP", "End_IP", "Size", "Date"])
+        isp_ipv4_assignment = pd.read_csv(
+            file_name, names=["ISP", "ISP_Eng", "Start_IP", "End_IP", "Size", "Date"]
+        )
         for _, row in isp_ipv4_assignment.iterrows():
             start = ipv4_to_int(row["Start_IP"])
             end = ipv4_to_int(row["End_IP"])
@@ -69,7 +72,7 @@ class Clusterer:
             return start
         if end_test == 0:
             return end
-        
+
         while start < end - 1:
             mid = (start + end) // 2
             mid_test = Clusterer.__range_test(self.__ranges[mid], target)
@@ -91,14 +94,16 @@ class Clusterer:
         return 0
 
     def debug(self):
-        for ((start, end, isp), cluster) in zip(self.__ranges, self.__clusters):
+        for (start, end, isp), cluster in zip(self.__ranges, self.__clusters):
             if len(cluster) == 0:
                 continue
 
-            print(f"===== ISP: {isp} / IP Range {ip_address(start)} ~ {ip_address(end)} =====")
+            print(
+                f"===== ISP: {isp} / IP Range {ip_address(start)} ~ {ip_address(end)} ====="
+            )
             for record in cluster:
                 print(record)
-        
+
         if len(self.__remainders) == 0:
             return
 
@@ -107,39 +112,35 @@ class Clusterer:
             print(record)
 
     def export(self, output_dir: str):
-        for ((start, end, isp), cluster) in zip(self.__ranges, self.__clusters):
+        for (start, end, isp), cluster in zip(self.__ranges, self.__clusters):
             if len(cluster) == 0:
                 continue
 
-            with open(f'{output_dir}/{isp}_{ip_address(start)}_{ip_address(end)}.csv', 'w') as f:
+            with open(
+                f"{output_dir}/{isp}_{ip_address(start)}_{ip_address(end)}.csv", "w"
+            ) as f:
                 for record in cluster:
                     print(record, file=f)
-        
+
         if len(self.__remainders) == 0:
             return
-        
-        with open(f'{output_dir}/remainders.csv', 'w') as f:
+
+        with open(f"{output_dir}/remainders.csv", "w") as f:
             for record in self.__remainders:
                 print(record, file=f)
 
 
 def main():
-    clusterer = Clusterer('src/assets/ipv4_ko_kr.csv')
+    clusterer = Clusterer("src/assets/ipv4_ko_kr.csv")
 
     # Example Data (IP Addresses)
-    data = [
-        "101.79.48.0",
-        "101.79.72.0",
-        "203.238.128.0",
-        "210.98.224.0",
-        "127.0.0.1"
-    ]
+    data = ["101.79.48.0", "101.79.72.0", "203.238.128.0", "210.98.224.0", "127.0.0.1"]
     records = list(DefaultRecord(ip) for ip in data)
 
     clusterer.add_records(records)
     clusterer.debug()
-    clusterer.export(output_dir='src/assets')
-    
+    clusterer.export(output_dir="src/assets")
+
 
 if __name__ == "__main__":
     main()
