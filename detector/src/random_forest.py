@@ -42,7 +42,6 @@ for service in data.services_v2:
     if len(df[df["label"] == 1]) == 0:
         print(f"no vpn packet for {service}")
         continue
-    print(len(df[df["label"] == 1]))
     f1 = fit_test(df)
     print(f"f1 score for {service} is {f1}")
 df = load_dataframe(version=2)

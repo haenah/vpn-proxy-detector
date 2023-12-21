@@ -10,15 +10,15 @@ def load_dataframe(service_names=None, version=1):
     totalSize = 0
     services = data.services if version == 1 else data.services_v2
     if service_names is None:
-        print("Loading all services")
         service_names = services.keys()
-    else:
-        print(f"Loading {service_names}")
     if isinstance(service_names, str):
         service_names = [service_names]
     dataframes = []
     for service_name in service_names:
-        output_path = f"./preprocessed/nfs/v{version}/{service_name}.csv"
+        output_path = os.path.join(
+            os.path.dirname(__file__),
+            f"../preprocessed/nfs/v{version}/{service_name}.csv",
+        )
         # If exists in preprocessed, load from there
         if os.path.exists(output_path):
             dataframe = pd.read_csv(output_path)
@@ -27,7 +27,11 @@ def load_dataframe(service_names=None, version=1):
             data_dict["label"] = []
             for file_name in services[service_name]:
                 is_vpn = file_name.startswith("vpn")
-                input_path = f"./data/{'vpn' if is_vpn else 'nvpn'}_pcap{'_v2' if version == 2 else ''}/{file_name}"
+                # input_path = f"../data/{'vpn' if is_vpn else 'nvpn'}_pcap{'_v2' if version == 2 else ''}/{file_name}"
+                input_path = os.path.join(
+                    os.path.dirname(__file__),
+                    f"../data/{'vpn' if is_vpn else 'nvpn'}_pcap{'_v2' if version == 2 else ''}/{file_name}",
+                )
                 streamer = NFStreamer(source=input_path, statistical_analysis=True)
 
                 for flow in streamer:
@@ -38,14 +42,16 @@ def load_dataframe(service_names=None, version=1):
             dataframe = pd.DataFrame(data_dict)
         totalSize += len(dataframe)
         dataframes.append(dataframe)
-    print(f"Loaded {totalSize} flows")
     return pd.concat(dataframes, ignore_index=True)
 
 
 if __name__ == "__main__":
     totalSize = 0
     version = int(sys.argv[1])
-    os.makedirs(f"./preprocessed/nfs/v{version}", exist_ok=True)
+    os.makedirs(
+        os.path.join(os.path.dirname(__file__), f"../preprocessed/nfs/v{version}/"),
+        exist_ok=True,
+    )
     services = (
         data.services if version == 1 else data.services_v2 if version == 2 else None
     )
@@ -53,5 +59,9 @@ if __name__ == "__main__":
         dataframe = load_dataframe(service_name, version=version)
         totalSize += len(dataframe)
         dataframe.to_csv(
-            f"./preprocessed/nfs/v{version}/{service_name}.csv", index=False
+            os.path.join(
+                os.path.dirname(__file__),
+                f"../preprocessed/nfs/v{version}/{service_name}.csv",
+            ),
+            index=False,
         )
