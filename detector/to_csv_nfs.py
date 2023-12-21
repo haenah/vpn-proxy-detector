@@ -1,7 +1,7 @@
 import pandas as pd
 from nfstream import NFStreamer
 import os
-from nf_attributes import attributes
+from nfs_attributes import csv_attributes
 
 from filenames import vpn_file_names, nvpn_file_names, file_name_groups
 
@@ -16,11 +16,11 @@ for file_name, is_vpn in file_name_groups[-1]:
     path = f"./data/{is_vpn}_pcap/{file_name}"
     streamer = NFStreamer(source=path, statistical_analysis=True)
 
-    data_dict = {k: [] for k in attributes}
+    data_dict = {k: [] for k in csv_attributes}
     data_dict["label"] = []
     data_dict["file_name"] = []
     for flow in streamer:
-        for k in attributes:
+        for k in csv_attributes:
             data_dict[k].append(getattr(flow, k))
         data_dict["label"].append(is_vpn)
         data_dict["file_name"].append(file_name)
