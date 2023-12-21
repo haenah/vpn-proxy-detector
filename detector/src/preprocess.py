@@ -6,7 +6,16 @@ import data
 import sys
 
 
-def load_dataframe(service_names=None, version=1):
+def load_dataframe(path):
+    streamer = NFStreamer(source=path, statistical_analysis=True)
+    data_dict = {k: [] for k in csv_attributes}
+    for flow in streamer:
+        for k in csv_attributes:
+            data_dict[k].append(getattr(flow, k))
+    return pd.DataFrame(data_dict)
+
+
+def load_dataframe_from_services(service_names=None, version=1):
     totalSize = 0
     services = data.services if version == 1 else data.services_v2
     if service_names is None:
@@ -27,7 +36,6 @@ def load_dataframe(service_names=None, version=1):
             data_dict["label"] = []
             for file_name in services[service_name]:
                 is_vpn = file_name.startswith("vpn")
-                # input_path = f"../data/{'vpn' if is_vpn else 'nvpn'}_pcap{'_v2' if version == 2 else ''}/{file_name}"
                 input_path = os.path.join(
                     os.path.dirname(__file__),
                     f"../data/{'vpn' if is_vpn else 'nvpn'}_pcap{'_v2' if version == 2 else ''}/{file_name}",
@@ -56,7 +64,7 @@ if __name__ == "__main__":
         data.services if version == 1 else data.services_v2 if version == 2 else None
     )
     for service_name in services.keys():
-        dataframe = load_dataframe(service_name, version=version)
+        dataframe = load_dataframe_from_services(service_name, version=version)
         totalSize += len(dataframe)
         dataframe.to_csv(
             os.path.join(
