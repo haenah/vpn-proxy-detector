@@ -2,30 +2,56 @@ import pandas as pd
 from nfstream import NFStreamer
 import os
 from nfs_attributes import csv_attributes
+import data
+import sys
 
-from filenames import vpn_file_names, nvpn_file_names, file_name_groups
+
+def load_dataframe(service_names=None, version=1):
+    totalSize = 0
+    services = data.services if version == 1 else data.services_v2
+    if service_names is None:
+        print("Loading all services")
+        service_names = services.keys()
+    else:
+        print(f"Loading {service_names}")
+    if isinstance(service_names, str):
+        service_names = [service_names]
+    dataframes = []
+    for service_name in service_names:
+        output_path = f"./preprocessed/nfs/v{version}/{service_name}.csv"
+        # If exists in preprocessed, load from there
+        if os.path.exists(output_path):
+            dataframe = pd.read_csv(output_path)
+        else:
+            data_dict = {k: [] for k in csv_attributes}
+            data_dict["label"] = []
+            for file_name in services[service_name]:
+                is_vpn = file_name.startswith("vpn")
+                input_path = f"./data/{'vpn' if is_vpn else 'nvpn'}_pcap{'_v2' if version == 2 else ''}/{file_name}"
+                streamer = NFStreamer(source=input_path, statistical_analysis=True)
+
+                for flow in streamer:
+                    for k in csv_attributes:
+                        data_dict[k].append(getattr(flow, k))
+                    data_dict["label"].append(1 if is_vpn else 0)
+
+            dataframe = pd.DataFrame(data_dict)
+        totalSize += len(dataframe)
+        dataframes.append(dataframe)
+    print(f"Loaded {totalSize} flows")
+    return pd.concat(dataframes, ignore_index=True)
 
 
-file_names = vpn_file_names + nvpn_file_names
-n_vpn = len(vpn_file_names)
-n_nvpn = len(nvpn_file_names)
-
-os.makedirs("./preprocessed/nfs", exist_ok=True)
-
-for file_name, is_vpn in file_name_groups[-1]:
-    path = f"./data/{is_vpn}_pcap/{file_name}"
-    streamer = NFStreamer(source=path, statistical_analysis=True)
-
-    data_dict = {k: [] for k in csv_attributes}
-    data_dict["label"] = []
-    data_dict["file_name"] = []
-    for flow in streamer:
-        for k in csv_attributes:
-            data_dict[k].append(getattr(flow, k))
-        data_dict["label"].append(is_vpn)
-        data_dict["file_name"].append(file_name)
-
-    df = pd.DataFrame(data_dict)
-    df["src_freq"] = df.groupby("dst_ip")["dst_ip"].transform("count") / len(df)
-    key = file_name.split("/")[-1].split(".")[0]
-    df.to_csv(f"./preprocessed/nfs/{key}.csv", mode="w")
+if __name__ == "__main__":
+    totalSize = 0
+    version = int(sys.argv[1])
+    os.makedirs(f"./preprocessed/nfs/v{version}", exist_ok=True)
+    services = (
+        data.services if version == 1 else data.services_v2 if version == 2 else None
+    )
+    for service_name in services.keys():
+        dataframe = load_dataframe(service_name, version=version)
+        totalSize += len(dataframe)
+        dataframe.to_csv(
+            f"./preprocessed/nfs/v{version}/{service_name}.csv", index=False
+        )
